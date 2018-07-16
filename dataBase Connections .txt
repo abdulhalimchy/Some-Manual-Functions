@@ -1,0 +1,132 @@
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
+import com.mysql.jdbc.Connection;
+import com.mysql.jdbc.PreparedStatement;
+import com.mysql.jdbc.Statement;
+
+public class MysqlConnection extends JFrame{
+
+	String dbUrl = "jdbc:mysql://localhost:3306/";
+	String dbName = "testing";
+	String userName = "root";
+	String password = "";
+	Connection connection = null;
+	public MysqlConnection() {
+		setSize(new Dimension(500, 500));
+		setLayout(new FlowLayout());
+		add(new JLabel("Hello Salman"));
+		setVisible(true);
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+	}
+	
+	boolean open(){
+		try {
+            connection = (Connection) DriverManager.getConnection(dbUrl + dbName, userName, password);
+            if (connection != null) {
+                System.out.println("Connected");
+                return true;
+            }
+        } catch (SQLException e) {
+            System.err.println("" + e.getMessage());
+        }
+		return false;
+	}
+	
+	public void close() throws SQLException{
+		connection.close();
+		connection=null;
+		System.out.println("Disconnected");
+	}
+	
+	public void createTable(String tableName) throws SQLException{
+		open();
+		String sql = "CREATE TABLE IF NOT EXISTS "+tableName+"(id int, name varchar(30))";
+		Statement create = (Statement) connection.createStatement();
+		create.executeUpdate(sql);
+		System.out.println("Table Created successfully");
+		close();
+			
+	}
+	
+	public boolean insertUser(int id, String name, String tbl_name) throws SQLException
+	{
+		open();
+		String sql = "INSERT INTO "+tbl_name+" VALUES("+id+", '"+name+"');";
+		
+		Statement stmnt = (Statement) connection.createStatement();
+		
+		int rowInserted = stmnt.executeUpdate(sql);
+		if(rowInserted>0)
+		{
+			System.out.println("1 row inserted Successfully");
+			close();
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	public boolean updateUser(String tableName, int id, String name) throws SQLException{
+		open();
+		String sql = "UPDATE "+tableName+" SET id="+id+" WHERE name='"+name+"'";
+		
+		Statement stmnt = (Statement) connection.createStatement();
+		int effected = stmnt.executeUpdate(sql);
+		
+		if(effected>0)
+		{
+			System.out.println("Updated Successfully");
+			close();
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	public boolean deleteUser(String tableName, int id) throws SQLException{
+		open();
+		String sql = "DELETE FROM "+tableName+" WHERE id="+id;
+		
+		Statement stmnt = (Statement) connection.createStatement();
+		int effected = stmnt.executeUpdate(sql);
+		
+		if(effected>0)
+		{
+			System.out.println("Row deleted Successfully");
+			close();
+			return true;
+		}
+		else
+			return false;
+	}
+	
+	public boolean deleteTable(String tableName) throws SQLException{
+		open();
+		String sql = "DROP TABLE IF EXISTS "+tableName;
+		
+		Statement stmnt = (Statement) connection.createStatement();
+		stmnt.executeUpdate(sql);
+		
+		System.out.println("Table deleted Successfully");
+		close();
+		return true;
+	}
+	
+	public static void main(String[] args) throws SQLException, InterruptedException {
+		MysqlConnection obj = new MysqlConnection();
+//		conn.open();
+//		Thread.sleep(2000);
+//		conn.close();
+//		obj.createTable("tbl_temp1");
+//		obj.insertUser(6, "What The Hell", "tbl_testing1");
+//		obj.updateUser("tbl_testing1", 1, "Myful");
+//		obj.deleteUser("tbl_testing1", 6);
+		obj.deleteTable("tbl_testing3");
+	}
+}
